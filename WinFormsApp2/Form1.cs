@@ -25,7 +25,7 @@ namespace WinFormsApp2
 
         public void IzmeniElement(string iText)
         {
-            label5.Text = iText; // изменили текст элемента
+            richTextBox1.Text += iText + "\n"; // изменили текст элемента
         }
 
 
