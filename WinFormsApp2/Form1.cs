@@ -7,13 +7,14 @@ namespace WinFormsApp2
 {
     public partial class Form1 : Form
     {
-        const string ip = "127.0.0.1";
+        const string ip = "26.9.58.34";
         const int port = 3336;
         IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
         Socket tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         Thread potok1 = null;
         Socket listener;
+        bool isauth = false;
 
         public delegate void MyDelegate(string iText);
 
@@ -45,7 +46,7 @@ namespace WinFormsApp2
         public void IzmeniElement(string iText)
         {
             richTextBox1.Text += iText + "\n"; // изменили текст элемента
-            listener.Send(Encoding.UTF8.GetBytes("Успех!"+ iText));
+            listener.Send(Encoding.UTF8.GetBytes("Успех!" + iText));
         }
         public void log_check(string iText)
         {
@@ -60,16 +61,21 @@ namespace WinFormsApp2
                     var log_pad = line.Split(' ');
                     if (a[0] == log_pad[0] && a[1] == log_pad[1])
                     {
-                        listener.Send(Encoding.UTF8.GetBytes("Успех log"));
+                        isauth = true;
+                        break;
                     }
                     else
                     {
-                        listener.Send(Encoding.UTF8.GetBytes("unУспех log"));
+                        isauth = false;
                     }
                     line = sr.ReadLine();
                 }
                 while (line != null);
-
+                if (isauth)
+                    listener.Send(Encoding.UTF8.GetBytes("Успех log"));
+                else
+                    listener.Send(Encoding.UTF8.GetBytes("unУспех log"));
+                isauth = false;
                 sr.Close();
             }
             catch (Exception e)

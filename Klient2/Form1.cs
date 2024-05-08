@@ -2,8 +2,10 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Reflection.Emit;
 
-namespace WinFormsApp1
+namespace Klient2
 {
     public partial class Form1 : Form
     {
@@ -62,7 +64,7 @@ namespace WinFormsApp1
             string[] m1 = message.Split('!');
             if (m1[0] == "Успех")
             {
-                richTextBox1.Text += m1[1]+"\n";
+                richTextBox1.Text += m1[1] + "\n";
                 return m1[0];
             }
             else
