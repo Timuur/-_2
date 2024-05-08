@@ -2,6 +2,12 @@ using System.Net.Sockets;
 using System.Net;
 using System.Text;
 using System.Windows.Forms;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ToolTip;
+using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Net.Security;
+using System.Drawing;
+using System;
+using System.Threading;
 
 namespace WinFormsApp1
 {
@@ -12,16 +18,35 @@ namespace WinFormsApp1
         const int port = 3336;
         IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
+        Thread poto1 = null;
         Socket tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         string login = null;
+
+
+        public delegate void MyDelegate(string iText);
 
         public Form1()
         {
             InitializeComponent();
-            tcpSocket.Connect(tcpEndPoint);
 
+            try
+            {
+                tcpSocket.Connect(tcpEndPoint);
+
+            }
+            catch (SocketException e141)
+            {
+                MessageBox.Show(e141.Message);
+            }
+            poto1 = new Thread(waa_it);
+
+            poto1.Start();
         }
-
+        public void IzmeniElement(string iText)
+        {
+            richTextBox1.Text += iText + "\n"; // изменили текст элемента
+            //listener.Send(Encoding.UTF8.GetBytes("Успех!" + iText));
+        }
         public static string CreateMD5(string input)
         {
             // Use input string to calculate MD5 hash
@@ -30,7 +55,7 @@ namespace WinFormsApp1
                 byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
                 byte[] hashBytes = md5.ComputeHash(inputBytes);
 
-                return Convert.ToHexString(hashBytes); // .NET 5 +
+                return Convert.ToHexString(hashBytes);
             }
         }
 
@@ -62,7 +87,8 @@ namespace WinFormsApp1
             string[] m1 = message.Split('!');
             if (m1[0] == "Успех")
             {
-                richTextBox1.Text += m1[1]+"\n";
+                //BeginInvoke(new MyDelegate(IzmeniElement), m1[1] + "\n");
+                richTextBox1.Text += m1[1] + "\n";
                 return m1[0];
             }
             else
@@ -70,8 +96,23 @@ namespace WinFormsApp1
                 return message;
             }
         }
+
+        public void waa_it()
+        {
+            byte[] data = new byte[1024];
+            int recv = tcpSocket.Receive(data);
+            string answ = Encoding.UTF8.GetString(data, 0, recv);
+            BeginInvoke(new MyDelegate(IzmeniElement), answ);
+        }
+
         private void button1_Click(object sender, EventArgs e)
         {
+            Thread.Sleep(1000);
+
+            //poto1 = new Thread(waa_it);
+
+            //poto1.Start();
+
             //label1.Text = "Введите сообщение:";
             string message = textBox1.Text;
             message = message_check(message);
@@ -91,7 +132,7 @@ namespace WinFormsApp1
             //while (tcpSocket.Available > 0);
             string answr = answer_check(answer.ToString());
 
-            label2.Text = answr;
+            label2.Text = answr; 
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)

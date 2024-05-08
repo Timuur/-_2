@@ -2,14 +2,16 @@ using System;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Windows.Forms;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace WinFormsApp2
 {
     public partial class Form1 : Form
     {
-        const string ip = "26.9.58.34";
+        //const string ip = "26.9.58.34";
         const int port = 3336;
-        IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
+        IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Any, port);
 
         Socket tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
         Thread potok1 = null;
@@ -39,8 +41,6 @@ namespace WinFormsApp2
                     IzmeniElement(iText);
                     break;
             }
-
-            MessageBox.Show(a[0]);
         }
 
         public void IzmeniElement(string iText)
@@ -82,33 +82,26 @@ namespace WinFormsApp2
             {
                 listener.Send(Encoding.UTF8.GetBytes("Exception: " + e.Message));
             }
-            //finally
-            //{
-            //    listener.Send(Encoding.UTF8.GetBytes("Executing finally block."));
-            //}
-
         }
 
 
         public void waait()
         {
             tcpSocket.Bind(tcpEndPoint);
-            tcpSocket.Listen(5);
+            tcpSocket.Listen(10);
             listener = tcpSocket.Accept();
+            IPEndPoint clientep = (IPEndPoint)listener.RemoteEndPoint;
+
+
+            BeginInvoke(new MyDelegate(IzmeniElement), $"Connected with {clientep.Address} at port {clientep.Port}" + "\n");
             while (true)
             {
-                var buffer = new byte[256];
-                var size = 0;
-                var data = new StringBuilder();
+                var data = new byte[1024];
+                var recv = listener.Receive(data);
 
-                do
-                {
-                    size = listener.Receive(buffer);
-                    data.Append(Encoding.UTF8.GetString(buffer, 0, size));
-                }
-                while (listener.Available > 0);
-
-                BeginInvoke(new MyDelegate(choose), data.ToString());
+                if(recv == 0) { break; }
+                string mess = Encoding.UTF8.GetString(data, 0, recv);
+                BeginInvoke(new MyDelegate(choose), mess);
 
                 //label5.Text = (data.ToString()); // TODO: проверить .ToString
 
@@ -121,7 +114,6 @@ namespace WinFormsApp2
         {
 
         }
-
 
 
         private void button1_Click(object sender, EventArgs e)
@@ -143,31 +135,14 @@ namespace WinFormsApp2
             //task.Start();
             potok1 = new Thread(waait);
 
-            // КОД 1 - здесь код до запуска потока
-            // создание отдельного потока
-            potok1.Start(); // запуск потока
-                            // КОД 2 - здесь код после запуска первого потока
-                            // КОД 3 - здесь код после запуска второго потока
+            potok1.Start();
             button1.Visible = false;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // // остановка потока
-            //try
-            //{
-            //    potok1.Abort();// Code that is executing when the thread is aborted.  
-            //}
-            //catch (PlatformNotSupportedException ex)
-            //{
-            //    // Clean-up code can go here.  
-            //    // If there is no Finally clause, ThreadAbortException is  
-            //    // re-thrown by the system at the end of the Catch clause.
-            //}
             listener.Shutdown(SocketShutdown.Both);
             listener.Close();
-
-
 
             //повторное нажатие кнопки вызывает
             //cancelTokenSource.Cancel();
