@@ -23,9 +23,37 @@ namespace WinFormsApp2
             InitializeComponent();
         }
 
+        private void choose(string iText)
+        {
+            var a = iText.Split('&');
+            switch (a[0])
+            {
+                case "log":
+                    log_check(a[1]);
+                    break;
+                case "unlog":
+                    listener.Send(Encoding.UTF8.GetBytes("unlog"));
+                    break;
+                default:
+                    IzmeniElement(iText);
+                    break;
+            }
+
+            MessageBox.Show(a[0]);
+        }
+
         public void IzmeniElement(string iText)
         {
             richTextBox1.Text += iText + "\n"; // изменили текст элемента
+            listener.Send(Encoding.UTF8.GetBytes("Успех"));
+        }
+        public void log_check(string iText)
+        {
+            var a = iText.Split(' ');
+            if (a[0] == "log" && a[1] == "pass") {
+                listener.Send(Encoding.UTF8.GetBytes("Успех log"));
+            }
+            else { listener.Send(Encoding.UTF8.GetBytes("unУспех log")); }
         }
 
 
@@ -47,11 +75,11 @@ namespace WinFormsApp2
                 }
                 while (listener.Available > 0);
 
-                BeginInvoke(new MyDelegate(IzmeniElement), data.ToString());
+                BeginInvoke(new MyDelegate(choose), data.ToString());
 
                 //label5.Text = (data.ToString()); // TODO: проверить .ToString
 
-                listener.Send(Encoding.UTF8.GetBytes("Успех"));
+                //listener.Send(Encoding.UTF8.GetBytes("Успех"));
             }
             
         }

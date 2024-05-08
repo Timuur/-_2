@@ -40,7 +40,7 @@
             textBox1.Name = "textBox1";
             textBox1.Size = new Size(341, 23);
             textBox1.TabIndex = 0;
-            textBox1.MouseLeave += textBox1_TextChanged;
+            textBox1.KeyPress += textBox1_KeyPress;
             // 
             // label1
             // 
@@ -59,6 +59,7 @@
             label2.Size = new Size(38, 15);
             label2.TabIndex = 2;
             label2.Text = "label2";
+            label2.TextChanged += label2_TextChanged;
             // 
             // button1
             // 

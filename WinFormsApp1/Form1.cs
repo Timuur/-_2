@@ -1,12 +1,14 @@
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using System.Windows.Forms;
 
 namespace WinFormsApp1
 {
     public partial class Form1 : Form
     {
         const string ip = "127.0.0.1";
+        bool isAuth = false;
         const int port = 3336;
         IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
@@ -19,15 +21,32 @@ namespace WinFormsApp1
 
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private string message_check(string message)
         {
+            string[] m1 = message.Split(' ');
+            if (!isAuth && m1[0] != "log")
+            {
+                message = message.Insert(0, "unlog&");
+                return message;
+            }
+            else if (m1[0] == "log")
+            {
+                message = message.Remove(3, 1);
 
+                message = message.Insert(3, "&");
+                return message;
+            }
+            else
+            {
+                //m.Insert(0, "");
+                return message;
+            }
         }
-
         private void button1_Click(object sender, EventArgs e)
         {
             label1.Text = "¬ведите сообщение:";
-            var message = textBox1.Text;
+            string message = textBox1.Text;
+            message = message_check(message);
 
             var data = Encoding.UTF8.GetBytes(message);
 
@@ -39,7 +58,7 @@ namespace WinFormsApp1
 
             //do
             //{
-                answer.Append(Encoding.UTF8.GetString(buffer, 0, size));
+            answer.Append(Encoding.UTF8.GetString(buffer, 0, size));
             //}
             //while (tcpSocket.Available > 0);
 
@@ -50,6 +69,23 @@ namespace WinFormsApp1
         {
             tcpSocket.Shutdown(SocketShutdown.Both);
             tcpSocket.Close();
+        }
+
+
+        private void textBox1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            if (!Char.IsLetterOrDigit(e.KeyChar) && e.KeyChar != 8 && !Char.IsWhiteSpace(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void label2_TextChanged(object sender, EventArgs e)
+        {
+            if (label2.Text == "”спех log")
+            {
+                isAuth = true;
+            }
         }
     }
 }
