@@ -13,12 +13,25 @@ namespace WinFormsApp1
         IPEndPoint tcpEndPoint = new IPEndPoint(IPAddress.Parse(ip), port);
 
         Socket tcpSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        string login = null;
 
         public Form1()
         {
             InitializeComponent();
             tcpSocket.Connect(tcpEndPoint);
 
+        }
+
+        public static string CreateMD5(string input)
+        {
+            // Use input string to calculate MD5 hash
+            using (System.Security.Cryptography.MD5 md5 = System.Security.Cryptography.MD5.Create())
+            {
+                byte[] inputBytes = System.Text.Encoding.ASCII.GetBytes(input);
+                byte[] hashBytes = md5.ComputeHash(inputBytes);
+
+                return Convert.ToHexString(hashBytes); // .NET 5 +
+            }
         }
 
         private string message_check(string message)
@@ -29,11 +42,13 @@ namespace WinFormsApp1
                 message = message.Insert(0, "unlog&");
                 return message;
             }
-            else if (m1[0] == "log")
+            else if (!isAuth && m1[0] == "log")
             {
-                message = message.Remove(3, 1);
+                login = m1[1];
+                string password = CreateMD5(m1[2]);
 
-                message = message.Insert(3, "&");
+                message = "log&" + login + " " + password;
+
                 return message;
             }
             else
@@ -42,9 +57,22 @@ namespace WinFormsApp1
                 return message;
             }
         }
+        private string answer_check(string message)
+        {
+            string[] m1 = message.Split('!');
+            if (m1[0] == "Успех")
+            {
+                richTextBox1.Text += m1[1]+"\n";
+                return m1[0];
+            }
+            else
+            {
+                return message;
+            }
+        }
         private void button1_Click(object sender, EventArgs e)
         {
-            label1.Text = "Введите сообщение:";
+            //label1.Text = "Введите сообщение:";
             string message = textBox1.Text;
             message = message_check(message);
 
@@ -61,8 +89,9 @@ namespace WinFormsApp1
             answer.Append(Encoding.UTF8.GetString(buffer, 0, size));
             //}
             //while (tcpSocket.Available > 0);
+            string answr = answer_check(answer.ToString());
 
-            label2.Text = answer.ToString();
+            label2.Text = answr;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
@@ -85,7 +114,16 @@ namespace WinFormsApp1
             if (label2.Text == "Успех log")
             {
                 isAuth = true;
+                label1.Text = $"Прив, {login}!";
+                button1.Text = "Отпрв";
             }
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            isAuth = false;
+            button1.Text = "Вход";
+            label1.Text = "";
         }
     }
 }

@@ -45,15 +45,42 @@ namespace WinFormsApp2
         public void IzmeniElement(string iText)
         {
             richTextBox1.Text += iText + "\n"; // изменили текст элемента
-            listener.Send(Encoding.UTF8.GetBytes("Успех"));
+            listener.Send(Encoding.UTF8.GetBytes("Успех!"+ iText));
         }
         public void log_check(string iText)
         {
             var a = iText.Split(' ');
-            if (a[0] == "log" && a[1] == "pass") {
-                listener.Send(Encoding.UTF8.GetBytes("Успех log"));
+            string line;
+            try
+            {
+                StreamReader sr = new StreamReader("TextFile1.txt");
+                line = sr.ReadLine();
+                do
+                {
+                    var log_pad = line.Split(' ');
+                    if (a[0] == log_pad[0] && a[1] == log_pad[1])
+                    {
+                        listener.Send(Encoding.UTF8.GetBytes("Успех log"));
+                    }
+                    else
+                    {
+                        listener.Send(Encoding.UTF8.GetBytes("unУспех log"));
+                    }
+                    line = sr.ReadLine();
+                }
+                while (line != null);
+
+                sr.Close();
             }
-            else { listener.Send(Encoding.UTF8.GetBytes("unУспех log")); }
+            catch (Exception e)
+            {
+                listener.Send(Encoding.UTF8.GetBytes("Exception: " + e.Message));
+            }
+            //finally
+            //{
+            //    listener.Send(Encoding.UTF8.GetBytes("Executing finally block."));
+            //}
+
         }
 
 
@@ -81,7 +108,7 @@ namespace WinFormsApp2
 
                 //listener.Send(Encoding.UTF8.GetBytes("Успех"));
             }
-            
+
         }
 
         private void label1_MouseEnter(object sender, EventArgs e)
@@ -89,10 +116,11 @@ namespace WinFormsApp2
 
         }
 
-       
+
 
         private void button1_Click(object sender, EventArgs e)
         {
+            textBox1.Text = "Сервер запущен";
             //CancellationToken token = cancelTokenSource.Token;
 
             //Task task = new Task(() =>
@@ -114,6 +142,7 @@ namespace WinFormsApp2
             potok1.Start(); // запуск потока
                             // КОД 2 - здесь код после запуска первого потока
                             // КОД 3 - здесь код после запуска второго потока
+            button1.Visible = false;
         }
 
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)

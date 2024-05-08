@@ -86,7 +86,7 @@
             Controls.Add(textBox1);
             Controls.Add(label5);
             Name = "Form1";
-            Text = "Form1";
+            Text = "Сервер";
             FormClosing += Form1_FormClosing;
             ResumeLayout(false);
             PerformLayout();
